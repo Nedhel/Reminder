@@ -3,12 +3,9 @@
     note:string
  }
  let timerNextEvent:number|null=null
+ const bell=new Audio('./campana.mp3')
  const x:Note[]= []
- x.push({timeTo:'Fri Sep 02 2022 14:22:00 GMT-0500 (hora de verano central)',note:'Al ultimo'})
- x.push({timeTo:'Fri Sep 02 2022 14:18:00 GMT-0500 (hora de verano central)',note:'Ya'})
- x.push({timeTo:'Fri Sep 02 2022 14:19:00 GMT-0500 (hora de verano central)',note:'Espera'})
- x.push({timeTo:'Fri Sep 02 2022 14:20:00 GMT-0500 (hora de verano central)',note:'Ya casi'})
-
+ 
  //devuelve la posision de la siguiente nota basado en el tiempo que falta para cumplirse
  function nextNote(arr:Note[]):number{ 
     let positionNext:number=-1;
@@ -51,7 +48,12 @@
 
  //muestra la nota en un alert
  function showReminder(arr:Note[]):void{
-   alert(arr[0].note)
+   document.getElementById('noteParagraph').innerHTML=arr[0].note
+   document.getElementById('timeParagraph').innerHTML=arr[0].timeTo
+   document.getElementById('alertMsj').classList.replace('invisible', 'visible')
+   document.getElementById('content').classList.replace('blur-none','blur-sm')
+   bell.play()
+   
  }
 
  function AddReminder():void{
@@ -60,7 +62,10 @@
    const d = new Date(Number(date[0]), Number(date[1])-1, Number(date[2]), Number(time[0]), Number(time[1]))
    x.push({timeTo:d.toString(),note:(<HTMLInputElement>document.getElementById('noteInput')).value})
    clearTimeout(timerNextEvent)
-   swapNotesPosition(x,nextNote(x),setTimer)
+   swapNotesPosition(x,nextNote(x),setTimer);
+   (<HTMLInputElement>document.getElementById('dateInput')).value=
+   (<HTMLInputElement>document.getElementById('timeInput')).value=
+   (<HTMLInputElement>document.getElementById('noteInput')).value=''
  }
 
  //regresa la fecha en milisegundos
@@ -76,17 +81,22 @@
    return reminderDate-curretDate.getTime()
  }
 
- console.log(x)
- swapNotesPosition(x,nextNote(x),setTimer)
- console.log(x)
+ function closeReminder():void{
+  document.getElementById('alertMsj').classList.replace('visible', 'invisible')
+   document.getElementById('content').classList.replace('blur-sm','blur-none')
+   clearTimeout(timerNextEvent)
+   swapNotesPosition(x,nextNote(x),setTimer)
+ }
 
  window.addEventListener('load',()=>{
-   let x=new Date()
-   let m= (x.getMonth()+1)<10?0+''+(x.getMonth()+1):(x.getMonth()+1)
-   let d= (x.getDate())<10?0+''+(x.getDate()):(x.getDate())
-   let today=x.getFullYear()+'-'+m+'-'+d
+   let date=new Date()
+   let month= (date.getMonth()+1)<10?0+''+(date.getMonth()+1):(date.getMonth()+1)
+   let day= (date.getDate())<10?0+''+(date.getDate()):(date.getDate())
+   let today=date.getFullYear()+'-'+month+'-'+day
    document.getElementById('dateInput').setAttribute('min',today)
    document.getElementById('addReminder').addEventListener('click',AddReminder)
+   document.getElementById('seenReminder').addEventListener('click',closeReminder)
+   swapNotesPosition(x,nextNote(x),setTimer)
  })
 
  
